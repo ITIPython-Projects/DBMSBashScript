@@ -6,7 +6,7 @@ shopt -s extglob
 source "colors.sh"
 source "globalVariables.sh"
 source "customMethod.sh"
-#source "masterSchemas.sh"
+source "masterSchemas.sh"
 #source "databaseMethod.sh"
 
 function main() {
