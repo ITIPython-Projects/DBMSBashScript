@@ -4,8 +4,8 @@ export LC_COLLATE=C
 shopt -s extglob
 #File Include
 source "colors.sh"
-#source "globalVariables.sh"
-#source "customMethod.sh"
+source "globalVariables.sh"
+source "customMethod.sh"
 #source "masterSchemas.sh"
 #source "databaseMethod.sh"
 
