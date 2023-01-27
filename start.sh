@@ -8,6 +8,7 @@ source "globalVariables.sh"
 source "customMethod.sh"
 source "masterSchemas.sh"
 source "databaseMethod.sh"
+source "tablesMethods.sh"
 
 function main() {
     # Check for Existing meta files
@@ -34,7 +35,6 @@ function main() {
         esac
 
     #----------------Connect To DataBase-----------------------
-    
     if  [[ $dbflage -eq 1 ]]
     then
         dbname=`pwd | grep -o "[^/]*$"`;
@@ -44,8 +44,7 @@ function main() {
         databaseMain name schemaName
         printf  "${On_Purple}${BWhite} You Are now connected to Schema->${schemaName} Database->(${name}) $Color_Off\n";
     fi
-    #----------------Db Operations-----------------------
-    
+    #----------------Db Operations(create Tables(DDL),Query(DML))-----------------------
 
 }
 

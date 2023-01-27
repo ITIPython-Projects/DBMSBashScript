@@ -31,7 +31,7 @@ function connectToDatabase(){
     fi
 }
 #------------- Initial Methods ----------------
-#Get Schema Name From User ::Return Schema To Conncet
+#Get database Name From User ::Return database To Conncet
 function getDatabaseName() {
     databaseNames=`ls -d ./*/ | cut -d'/' -f2` 
     i=0
@@ -76,7 +76,7 @@ function databaseMain(){
             # Continue From Here if u want To add a Back Button 
         ;;
         *)
-            printf "${Red}Plz Select 1, 2, or 3${Color_Off}"
+            printf "${Red}Plz Select 1, 2 ${Color_Off}"
         ;;
         esac
         cd "${startPWD}"
