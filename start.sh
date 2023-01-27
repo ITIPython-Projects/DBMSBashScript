@@ -45,7 +45,7 @@ function main() {
         printf  "${On_Purple}${BWhite} You Are now connected to Schema->${schemaName} Database->(${name}) $Color_Off\n";
     fi
     #----------------Db Operations(create Tables(DDL),Query(DML))-----------------------
-
+    tablesMain
 }
 
 
