@@ -1,7 +1,5 @@
 #!/usr/bin/bash
-source "colors.sh"
-source "globalVariables.sh"
-source "customMethod.sh"
+source "queryMethods.sh"
 #------------- Create Table ----------------
 function createTable(){
     printf " Plz Enter the Number of Tables::"
@@ -11,6 +9,8 @@ function createTable(){
         printf " Plz Enter the table$i Name:"
         #Custom NameCheck (Name is Valid and  Note Exist)
         ValidName tablename
+        #Lower Case Name
+        tablename=`echo $tablename | tr "[:upper:]" "[:lower:]"`
         #Enter Number of Columns
         printf " Plz Enter the Number of Columns:: "
         readInt colnumber
@@ -21,6 +21,8 @@ function createTable(){
             printf " Plz Enter the Columns$j Name:"
             #Custom NameCheck (Name is Valid and  Note Exist)
             columnValidName name $createdColumnsName;
+            #LowerCase Column Name
+            name=`echo $name | tr "[:upper:]" "[:lower:]"`
             createdColumnsName="$createdColumnsName:$name";
             select opt in "Press 1 for integer" "Press 2 for String" 
             do
@@ -37,7 +39,7 @@ function createTable(){
                 esac
                 break
             done
-            select opt in "Press 1 for primaryKey" " Press 2 for Not" 
+            select opt in "Press 1 for primaryKey" "Press 2 for Not" 
             do
                 case $REPLY in 
                 1)
@@ -69,27 +71,72 @@ function createTable(){
         printf  "${tablename} Table Created ${Green} Successfully ${Color_Off}\n"
     done
 }
-
+function listTables(){
+    files=`ls -p | grep -v / | wc -l`
+    if  [[ $files -gt 0 ]]
+    then
+        echo "All Tables: " `ls -p | grep -v / `
+    else
+        printf "${BRed}No Tables Created Yet${Color_Off}\n "
+    fi
+}
+#------------- Query Navigator Table ----------------
+function queryNavigator(){
+    printf " Type Exit to Extit\n"
+    while [ true ]
+    do
+        #Get Query
+        query="empty"
+        printf " Query>>:: ${BCyan}"
+        read query
+        printf $Color_Off
+        #Lower Case Query
+        querylower=`echo $query | tr "[:upper:]" "[:lower:]"`
+        #check Query Type    
+        case `echo $querylower | cut -d" " -f1` in 
+        "select")
+            selectQuery $querylower
+        ;;
+        "insert")
+            insertQuery $querylower
+        ;;
+        "delete")
+            delectQuery $querylower
+        ;;
+        "update")
+            updateQuery $querylower
+        ;;
+        "exit")
+            break;
+        ;;
+        *)
+            printf "${Red}Syntax Erorr near to `echo $query | cut -d" " -f1`${Color_Off}\n"
+        ;;
+            esac
+    done
+}
 
 function tablesMain(){
     while [ true ]
     do
-        printf " Press 1 To create Table\n Press 3 to Drop Table\n Press 3 to Make Query\n"
+        printf " Press 1 To create Table\n Press 2 to List Tables\n Press 3 to Drop Table\n Press 4 to Make Query\n"
         read -p "$>" choice
         case $choice in 
         "1")
             createTable
         ;;
         "2")
-            dropTable
+            listTables
         ;;
         "3")
+            dropTable
+        ;;
+        "4")
             queryNavigator
         ;;
         *)
-            printf "${Red}Plz Select 1, 2, 3${Color_Off}"
+            printf "${Red}Plz Select 1, 2, 3${Color_Off}\n"
         ;;
         esac
     done
 }
-tablesMain
