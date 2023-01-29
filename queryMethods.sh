@@ -315,7 +315,16 @@ function insertQuery(){
     printf  " Insertaion ${Green}success${Color_Off}\n"
 }
 function delectQuery(){
-    echo "delete"
+    #splite Query
+    IFS=' ' read -ra queryArr <<< "$@";
+    #Check if table exist 
+    if ! [ `find -name "${queryArr[1]}"` ]
+    then
+        printf "${Red} No table Name ${queryArr[1]}${Color_Off}\n";
+        return 0;
+    fi
+    rm ${queryArr[1]}
+    printf  " Deleted ${Green}success${Color_Off}\n"
 }
 function updateQuery(){
     #splite Query
