@@ -1,5 +1,233 @@
 function selectQuery(){
-    echo "select"
+    IFS=' ' read -ra queryArr <<< "$@";
+    #Check From Key Word 
+    if ! [ "${queryArr[2]}" = "from" ]
+    then
+        printf "${Red}Syntax Erorr near to ${queryArr[2]}${Color_Off}\n";
+        return 0;
+    fi
+    #Check if table exist 
+    if ! [ `find -name "${queryArr[3]}"` ]
+    then
+        printf "${Red} No table Name ${queryArr[3]}${Color_Off}\n";
+        return 0;
+    fi
+    #Table Name
+    tableName=${queryArr[3]}
+    #Readed Variables
+    metaFileColumnsName=`sed -n '1p' $metaName`
+    metaFileDataType=`sed -n '2p' $metaName`
+    metaFileDataConstraint=`sed -n '3p' $metaName`
+    IFS=':' read -ra metaColumnsNameArr <<< "$metaFileColumnsName";
+    IFS=':' read -ra metaDataTpeArr <<< "$metaFileDataType";
+    IFS=':' read -ra metaConstraintArr <<< "$metaFileDataConstraint";
+    #Check if table exist 
+    case ${queryArr[1]} in 
+    "")
+        printf "${Red} No Selected Col${Color_Off}\n";
+        return 0;
+    ;;
+    "@")
+        local i=0
+        for coltype in "${metaColumnsNameArr[@]}";do
+            selectedCol[$i]=$i
+            i=$(($i+1))
+        done
+    ;;
+    *)
+        IFS=',' read -ra selColArr <<< "${queryArr[1]}";
+        local selectedCol=0
+        local i=0
+        for selCol in "${selColArr[@]}";do
+             i=0
+             NotfoundFlage=1
+             for mainCol in "${metaColumnsNameArr[@]}";do
+                if [ "$selCol" = "$mainCol" ];then
+                    selectedCol[$i]=$i
+                    NotfoundFlage=0
+                fi
+                i=$(($i+1))
+             done
+             if [ $NotfoundFlage -eq 1 ];then
+                printf "${Red} No Column Name $selCol ${Color_Off}\n";
+                return 0;
+             fi
+        done
+    ;;
+    esac
+    #Condetion Statement
+    if [ "${queryArr[4]}" = "" ];then
+        #No Condition
+        local indexnum=""
+        for selCol in "${selectedCol[@]}";do
+            local ind=1
+            ind=$(($selCol + $ind))
+            indexnum="$indexnum,$ind"
+        done
+        indexnum=${indexnum#?}
+        echo `cut -d: -f"$indexnum" ./$tableName`
+        #Display
+        #echo `cut -d: -f"$indexnum" ./$tableName` > ".displayFile"
+    else
+        if ! [ "${queryArr[4]}" = "where" ];then
+            printf "${Red} Expected WHERE KeyWord $selCol ${Color_Off}\n";
+            return 0;
+        fi
+        #Check if Column exist 
+        if ! [ `sed -n '1p' $metaName | grep -w "${queryArr[5]}"` ]
+        then
+            printf "${Red} No Column Name ${queryArr[5]}${Color_Off}\n";
+            return 0;
+        fi
+        #Get condition Column
+        local conditionCol=0
+        for colName in "${metaColumnsNameArr[@]}";do
+            if [ "${queryArr[5]}" = "$colName" ];then
+                break;
+            fi
+            conditionCol=$(($conditionCol+1))
+        done
+        #Get New condition Value
+        if [ "${queryArr[7]}" = '' ]
+        then
+            printf "${Red}Syntax Erorr, Condition VALUE NOT FOUND${Color_Off}\n";
+            return 0;
+        fi
+        condetionValue=${queryArr[7]}
+        local indexnum=""
+        for selCol in "${selectedCol[@]}";do
+            local ind=1
+            ind=$(($selCol + $ind))
+            indexnum="$indexnum,$ind"
+        done
+        indexnum=${indexnum#?}
+        case ${queryArr[6]} in 
+        "==")
+            #echo `cut -d: -f"$indexnum" ./$tableName | awk -F: -v col=$conditionCol -v conval=$condetionValue '$$col == $conval {print $0}'`
+            while read p; do
+                IFS=':' read -ra rowArr <<< "$p";
+                row=""
+                if [[ "${rowArr[$conditionCol]}" == "$condetionValue" ]];then
+                    for selCol in "${selectedCol[@]}";do
+                        row="$row:${rowArr[$selCol]}"
+                    done
+                fi
+                row=${row#?}
+                if [[ "$row" != '' ]];then
+                 echo $row
+                fi
+            done < "./$tableName" 
+        ;;
+        "!=")
+            while read p; do
+                IFS=':' read -ra rowArr <<< "$p";
+                row=""
+                if [[ "${rowArr[$conditionCol]}" != "$condetionValue" ]];then
+                    for selCol in "${selectedCol[@]}";do
+                        row="$row:${rowArr[$selCol]}"
+                    done
+                fi
+                row=${row#?}
+                if [[ "$row" != '' ]];then
+                 echo $row
+                fi
+            done < "./$tableName" 
+        ;;
+        ">")
+            #Check If condetionValue Is a number
+            isNumber $condetionValue erorr
+            if [ $erorr -eq 1 ]
+            then
+                printf "${Red}Expexted Number in Condition (<)${Color_Off}\n";
+                return 0;
+            fi
+            while read p; do
+                IFS=':' read -ra rowArr <<< "$p";
+                row=""
+                if [[ "${rowArr[$conditionCol]}" -gt "$condetionValue" ]];then
+                    for selCol in "${selectedCol[@]}";do
+                        row="$row:${rowArr[$selCol]}"
+                    done
+                fi
+                row=${row#?}
+                if [[ "$row" != '' ]];then
+                 echo $row
+                fi
+            done < "./$tableName" 
+        ;;
+        "<")
+            #Check If condetionValue Is a number
+            isNumber $condetionValue erorr
+            if [ $erorr -eq 1 ]
+            then
+                printf "${Red}Expexted Number in Condition (<)${Color_Off}\n";
+                return 0;
+            fi
+            while read p; do
+                IFS=':' read -ra rowArr <<< "$p";
+                row=""
+                if [[ "${rowArr[$conditionCol]}" -lt "$condetionValue" ]];then
+                    for selCol in "${selectedCol[@]}";do
+                        row="$row:${rowArr[$selCol]}"
+                    done
+                fi
+                row=${row#?}
+                if [[ "$row" != '' ]];then
+                 echo $row
+                fi
+            done < "./$tableName" 
+        ;;
+        ">=")
+            #Check If condetionValue Is a number
+            isNumber $condetionValue erorr
+            if [ $erorr -eq 1 ]
+            then
+                printf "${Red}Expexted Number in Condition (<)${Color_Off}\n";
+                return 0;
+            fi
+            while read p; do
+                IFS=':' read -ra rowArr <<< "$p";
+                row=""
+                if [[ "${rowArr[$conditionCol]}" -ge "$condetionValue" ]];then
+                    for selCol in "${selectedCol[@]}";do
+                        row="$row:${rowArr[$selCol]}"
+                    done
+                fi
+                row=${row#?}
+                if [[ "$row" != '' ]];then
+                 echo $row
+                fi
+            done < "./$tableName" 
+        ;;
+        "<=")
+            #Check If condetionValue Is a number
+            isNumber $condetionValue erorr
+            if [ $erorr -eq 1 ]
+            then
+                printf "${Red}Expexted Number in Condition (<)${Color_Off}\n";
+                return 0;
+            fi
+            while read p; do
+                IFS=':' read -ra rowArr <<< "$p";
+                row=""
+                if [[ "${rowArr[$conditionCol]}" -le "$condetionValue" ]];then
+                    for selCol in "${selectedCol[@]}";do
+                        row="$row:${rowArr[$selCol]}"
+                    done
+                fi
+                row=${row#?}
+                if [[ "$row" != '' ]];then
+                 echo $row
+                fi
+            done < "./$tableName"
+        ;;
+        *)
+            printf "${Red}Syntax Erorr, Condition Operator NOT Suppurted ${queryArr[6]}${Color_Off}\n";
+            return 0;
+        ;;
+        esac
+
+    fi
 }
 function insertQuery(){
     #splite Query
