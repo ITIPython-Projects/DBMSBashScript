@@ -34,6 +34,30 @@ function connectToSchema(){
         eval $1=0
     fi
 }
+#------------- list Schemas ----------------
+function listSchemas(){
+    dir=`ls -d */ | wc -l`
+    if  [[ $dir -gt 0 ]]
+    then
+        echo "All Schemas: " `ls -d */ `
+    else
+        printf "${BRed}No Schemas Created Yet${Color_Off}\n "
+    fi
+}
+#------------- Delete Schemas ----------------
+function deleteSchemas(){
+    listDir=`ls -l | awk '/^d/{print $9}' | wc -l`
+    if  [[ $listDir -gt 0 ]]
+    then
+        printf  "${On_IGreen}${BIBlack}Chose From List..... $Color_Off\n"
+        #get Valid Database Name
+        getSchemaName selectedName
+        rm -r ./$selectedName
+        printf  " Deleted ${Green}success${Color_Off}\n"
+    else
+        printf "${BRed}No Schemas Created Yet${Color_Off} "
+    fi
+}
 #------------- Initial Methods ----------------
 
 #Creat  masterschemas .meta
@@ -68,7 +92,7 @@ function masterSchemasMain(){
     #select num in "Press 1 To create Schema" "Press 2 to Connect to Schema" "Press 3 to Exit"
     while [ true ]
     do
-        printf " Press 1 To create Schema\n Press 2 to Connect to Schema\n"
+        printf " Press 1 To create Schema\n Press 2 to Connect to Schema\n Press 3 to List Schemas\n Press 4 to Delete Schema\n"
         read -p "$>" choice
         case $choice in 
         "1")
@@ -86,8 +110,14 @@ function masterSchemasMain(){
             esac
             # Continue From Here if u want To add a Back Button 
         ;;
+        "3")
+            listSchemas
+        ;;
+        "4")
+            deleteSchemas
+        ;;
         *)
-            printf "${Red}Plz Select 1, 2, or 3${Color_Off}"
+            printf "${Red}Plz Select 1, 2, 3, 4${Color_Off}"
         ;;
         esac
         cd "${startPWD}"

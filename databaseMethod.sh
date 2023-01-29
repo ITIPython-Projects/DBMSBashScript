@@ -20,7 +20,7 @@ function connectToDatabase(){
     listDir=`ls -l | awk '/^d/{print $9}' | wc -l`
     if  [[ $listDir -gt 0 ]]
     then
-        printf  "${On_IGreen}${BIBlack}Connecting To Schema Chose From List..... $Color_Off\n"
+        printf  "${On_IGreen}${BIBlack}Connecting To Database Chose From List..... $Color_Off\n"
         #get Valid Database Name
         getDatabaseName selectedName
         cd ./$selectedName
@@ -28,6 +28,30 @@ function connectToDatabase(){
     else
         printf "${BRed}No DataBase Created Yet${Color_Off} "
         eval $1=0
+    fi
+}
+#------------- list Database ----------------
+function listDatabase(){
+    dir=`ls -d */ | wc -l`
+    if  [[ $dir -gt 0 ]]
+    then
+        echo "All DataBase: " `ls -d */ `
+    else
+        printf "${BRed}No DataBase Created Yet${Color_Off}\n "
+    fi
+}
+#------------- Delete Database ----------------
+function deleteDatabase(){
+    listDir=`ls -l | awk '/^d/{print $9}' | wc -l`
+    if  [[ $listDir -gt 0 ]]
+    then
+        printf  "${On_IGreen}${BIBlack}Chose From List..... $Color_Off\n"
+        #get Valid Database Name
+        getDatabaseName selectedName
+        rm -r ./$selectedName
+        printf  " Deleted ${Green}success${Color_Off}\n"
+    else
+        printf "${BRed}No DataBase Created Yet${Color_Off} "
     fi
 }
 #------------- Initial Methods ----------------
@@ -57,7 +81,7 @@ function databaseMain(){
     startPWD=`pwd`
     while [ true ]
     do
-        printf " Press 1 To create dataBase\n Press 2 to Connect to DataBase\n"
+        printf " Press 1 To create dataBase\n Press 2 to Connect to DataBase\n Press 3 to List Database\n Press 4 to Delete Database\n"
         read -p "$>" choice
         case $choice in 
         "1")
@@ -75,12 +99,17 @@ function databaseMain(){
             esac
             # Continue From Here if u want To add a Back Button 
         ;;
+        "3")
+            listDatabase
+        ;;
+        "4")
+            deleteDatabase
+        ;;
         *)
-            printf "${Red}Plz Select 1, 2 ${Color_Off}"
+            printf "${Red}Plz Select 1, 2, 3 ${Color_Off}"
         ;;
         esac
         cd "${startPWD}"
-        printf "$Color_Off"
         eval $schemaName="'$1'"
         printf  "\n${On_Black}${BWhite} You Are in $schemaName Schemas ${Color_Off}\n";
         
