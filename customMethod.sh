@@ -63,3 +63,10 @@ function columnValidName() {
 function getDirectories(){
     schemaNames=`ls -d ./*/ | cut -d'/' -f2`
 }
+#Is A number
+function isNumber() {
+    if  [[ $1 =~ $NUMBERREGEXP ]]
+    then
+        (($2=0));
+    fi
+}
