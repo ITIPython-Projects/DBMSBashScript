@@ -80,6 +80,19 @@ function listTables(){
         printf "${BRed}No Tables Created Yet${Color_Off}\n "
     fi
 }
+function dropTable(){
+    files=`ls -p | grep -v / | wc -l`
+    if  [[ $files -gt 0 ]]
+    then
+        printf  "${On_IGreen}${BIBlack}Chose From List..... $Color_Off\n"
+        echo "All Tables: " `ls -p | grep -v / `
+        read selectedName
+        rm  ./$selectedName
+        printf  " Deleted ${Green}success${Color_Off}\n"
+    else
+        printf "${BRed}No Tables Created Yet${Color_Off}\n "
+    fi
+}
 #------------- Query Navigator Table ----------------
 function queryNavigator(){
     printf " Type Exit to Extit\n"
