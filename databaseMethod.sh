@@ -66,7 +66,7 @@ function getDatabaseName() {
     done
     while [ true ]
     do
-        printf "\nType db Name To Connect ${errorMassage}: "
+        printf "\nType db Name  ${errorMassage}: "
         read  name;
         if  printf '%s\0' "${dbarr[@]}" | grep -Fxqz -- "${name}"; then
             eval $1="'$name'"

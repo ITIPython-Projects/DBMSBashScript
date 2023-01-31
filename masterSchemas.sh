@@ -75,7 +75,7 @@ function getSchemaName() {
     done
     while [ true ]
     do
-        printf "\nType Schema Name To Connect ${errorMassage}: "
+        printf "\nType Schema Name  ${errorMassage}: "
         read  name;
         if  printf '%s\0' "${schemaarr[@]}" | grep -Fxqz -- "${name}"; then
             eval $1="'$name'"
